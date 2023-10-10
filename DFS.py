@@ -28,28 +28,29 @@ def dfs(grid, start, goal):
     stack = [start]
     visited = set()
     visited_list = []  # Lista para almacenar los nodos visitados en orden
-    
+
     parent = {}
-    
+
     while stack:
         current = stack.pop()
         if current == goal:
             break
-        
+
         x, y = current
-        visited.add(current)
-        visited_list.append(current)
-        
-        # Define los movimientos posibles: arriba, abajo, derecha, izquierda.
-        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-        
-        for dx, dy in moves:
-            neighbor = (x + dx, y + dy)
-            
-            if is_valid(neighbor[0], neighbor[1], grid) and neighbor not in visited:
-                stack.append(neighbor)
-                parent[neighbor] = current
-    
+        if current not in visited:
+            visited.add(current)
+            visited_list.append(current)
+
+            # Define los movimientos posibles: arriba, abajo, derecha, izquierda.
+            moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+            for dx, dy in moves:
+                neighbor = (x + dx, y + dy)
+
+                if is_valid(neighbor[0], neighbor[1], grid) and neighbor not in visited:
+                    stack.append(neighbor)
+                    parent[neighbor] = current
+
     # Reconstruye la trayectoria desde el objetivo hasta el inicio.
     path = []
     current = goal
@@ -58,11 +59,12 @@ def dfs(grid, start, goal):
         current = parent.get(current)  # Usamos .get() para evitar KeyError
         if current is None:
             break
-    
+
     path.append(start)
-    
+
     # Devuelve tanto la lista de nodos visitados como el camino
     return visited_list, path[::-1]
+
 
 
 def draw_grid(grid, start, goal, path, visited):

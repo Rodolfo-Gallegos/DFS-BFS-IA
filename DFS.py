@@ -27,6 +27,8 @@ def generate_start_goal(grid):
 def dfs(grid, start, goal):
     stack = [start]
     visited = set()
+    visited_list = []  # Lista para almacenar los nodos visitados en orden
+    
     parent = {}
     
     while stack:
@@ -36,9 +38,10 @@ def dfs(grid, start, goal):
         
         x, y = current
         visited.add(current)
+        visited_list.append(current)
         
         # Define los movimientos posibles: arriba, abajo, derecha, izquierda.
-        moves = [(0, -1), (0, 1), (1, 0), (-1, 0)]
+        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         
         for dx, dy in moves:
             neighbor = (x + dx, y + dy)
@@ -57,32 +60,64 @@ def dfs(grid, start, goal):
             break
     
     path.append(start)
-    return path[::-1]
+    
+    # Devuelve tanto la lista de nodos visitados como el camino
+    return visited_list, path[::-1]
 
-    # if current is not None:
-    #     path.append(start)
-    #     return path[::-1]
-    # else:
-    #     return []  # No se encontró una ruta válida
 
-def draw_grid(grid, start, goal, path):
-    plt.imshow(grid, cmap='gray')
-    plt.scatter(*start[::-1], color='green', marker='o', s=100, label='Inicio')
-    plt.scatter(*goal[::-1], color='red', marker='x', s=100, label='Meta')
+def draw_grid(grid, start, goal, path, visited):
+    fig, ax = plt.subplots()
+    
+    # Configura el fondo blanco
+    ax.set_facecolor('white')
+    
+    # Tamaño de las celdas y espaciado de la cuadrícula
+    cell_size = 1
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            if grid[i][j] == 1:  # Obstáculo
+                ax.add_patch(plt.Rectangle((j * cell_size, i * cell_size), cell_size, cell_size, color='black'))
+            elif grid[i][j] == 0:  # Celda libre
+                ax.add_patch(plt.Rectangle((j * cell_size, i * cell_size), cell_size, cell_size, color='white', edgecolor='black'))
+    
+    plt.scatter(start[1] * cell_size + cell_size / 2, start[0] * cell_size + cell_size / 2, color='orange', marker='o', s=100)
+    plt.scatter(goal[1] * cell_size + cell_size / 2, goal[0] * cell_size + cell_size / 2, color='red', marker='x', s=100)
     
     if path:
         path_x, path_y = zip(*path)
+        path_x = [x * cell_size + cell_size / 2 for x in path_x]
+        path_y = [y * cell_size + cell_size / 2 for y in path_y]
         plt.plot(path_y, path_x, color='blue', label='Camino')
+    
+    if visited:
+        visited_x, visited_y = zip(*visited)
+        visited_x = [x * cell_size + cell_size / 2 for x in visited_x]
+        visited_y = [y * cell_size + cell_size / 2 for y in visited_y]
+        for i, (x, y) in enumerate(zip(visited_x, visited_y), 1):
+            plt.text(y, x, str(i), ha='center', va='center', color='green', fontsize=10)
+    
+    # Dibuja la cuadrícula
+    for i in range(len(grid) + 1):
+        plt.axhline(y=i * cell_size, color='black', linewidth=0.1)
+    for j in range(len(grid[0]) + 1):
+        plt.axvline(x=j * cell_size, color='black', linewidth=0.1)
+    
+    # Quitar los labels de los ejes
+    #ax.set_xticks([])
+    #ax.set_yticks([])
     
     plt.legend()
     plt.show()
+
+
+
 
 def main():
     n = 10  # Tamaño de la cuadrícula (NxN)
     grid = initialize_grid(n)
     
-    # Genera obstáculos aleatorios (N/2 obstáculos)
-    num_obstacles = n // 2
+    # Genera obstáculos aleatorios (N^2/2 obstáculos)
+    num_obstacles = (n*n) // 4
     generate_obstacles(grid, num_obstacles)
     
     try:
@@ -91,13 +126,14 @@ def main():
         print(e)
         return
     
-    path = dfs(grid, start, goal)
+    visited, path = dfs(grid, start, goal)
     if path:
         print("Camino encontrado:", path)
+        print("Camino recorrido:", visited)
     else:
         print("No se encontró un camino válido.")
     
-    draw_grid(grid, start, goal, path)
+    draw_grid(grid, start, goal, path, visited)
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 def initialize_grid(n):
     # Crea una cuadrícula NxN con todos los elementos inicializados a 0.
@@ -8,6 +9,20 @@ def initialize_grid(n):
 def is_valid(x, y, grid):
     # Verifica si las coordenadas (x, y) están dentro de la cuadrícula y no son un obstáculo (valor 1).
     return 0 <= x < len(grid) and 0 <= y < len(grid[0]) and grid[x][y] == 0
+
+def generate_obstacles(grid, n):
+    for _ in range(n):
+        x, y = random.randint(0, len(grid) - 1), random.randint(0, len(grid[0]) - 1)
+        while grid[x][y] == 1:
+            x, y = random.randint(0, len(grid) - 1), random.randint(0, len(grid[0]) - 1)
+        grid[x][y] = 1
+
+def generate_start_goal(grid):
+    empty_cells = [(x, y) for x in range(len(grid)) for y in range(len(grid[0])) if grid[x][y] == 0]
+    if len(empty_cells) < 2:
+        raise ValueError("La cuadrícula no tiene suficientes celdas libres para establecer el inicio y la meta.")
+    start, goal = random.sample(empty_cells, 2)
+    return start, goal
 
 def dfs(grid, start, goal):
     stack = [start]
@@ -22,8 +37,8 @@ def dfs(grid, start, goal):
         x, y = current
         visited.add(current)
         
-        # Define los movimientos posibles: arriba, abajo, izquierda y derecha.
-        moves = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        # Define los movimientos posibles: arriba, abajo, derecha, izquierda.
+        moves = [(0, -1), (0, 1), (1, 0), (-1, 0)]
         
         for dx, dy in moves:
             neighbor = (x + dx, y + dy)
@@ -37,10 +52,18 @@ def dfs(grid, start, goal):
     current = goal
     while current != start:
         path.append(current)
-        current = parent[current]
-    path.append(start)
+        current = parent.get(current)  # Usamos .get() para evitar KeyError
+        if current is None:
+            break
     
+    path.append(start)
     return path[::-1]
+
+    # if current is not None:
+    #     path.append(start)
+    #     return path[::-1]
+    # else:
+    #     return []  # No se encontró una ruta válida
 
 def draw_grid(grid, start, goal, path):
     plt.imshow(grid, cmap='gray')
@@ -58,15 +81,21 @@ def main():
     n = 10  # Tamaño de la cuadrícula (NxN)
     grid = initialize_grid(n)
     
-    start = (0, 0)  # Coordenadas de inicio
-    goal = (9, 9)   # Coordenadas de la meta
+    # Genera obstáculos aleatorios (N/2 obstáculos)
+    num_obstacles = n // 2
+    generate_obstacles(grid, num_obstacles)
     
-    # Establece obstáculos en la cuadrícula (1 indica un obstáculo).
-    grid[1][2] = grid[2][2] = grid[3][2] = grid[4][2] = 1
-    grid[6][5] = grid[6][6] = grid[6][7] = 1
+    try:
+        start, goal = generate_start_goal(grid)
+    except ValueError as e:
+        print(e)
+        return
     
     path = dfs(grid, start, goal)
-    print("Camino encontrado:", path)
+    if path:
+        print("Camino encontrado:", path)
+    else:
+        print("No se encontró un camino válido.")
     
     draw_grid(grid, start, goal, path)
 

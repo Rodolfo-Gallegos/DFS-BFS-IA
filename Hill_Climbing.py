@@ -25,7 +25,7 @@ def genera_start_goal(grid):
 def manhattan_distance(point1, point2):
     return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 
-def hill_climbing(grid, start, goal, max_iterations=100):
+def hill_climbing(grid, start, goal, max_iterations):
     current = start
     visited = set()
     visited_list = []
@@ -38,7 +38,7 @@ def hill_climbing(grid, start, goal, max_iterations=100):
         path.append(current)
         x, y = current
 
-        moves = [(x, y - 1), (x, y + 1), (x + 1, y), (x - 1, y)]
+        moves = [(x, y + 1), (x, y - 1), (x + 1, y), (x - 1, y)]
         moves.sort(key=lambda move: manhattan_distance(move, goal))
 
         for move in moves:
@@ -108,7 +108,7 @@ def main():
         print(e)
         return
 
-    path, visited = hill_climbing(grid, start, goal, max_iterations=100)
+    path, visited = hill_climbing(grid, start, goal, num_obstacles)
 
     if path:
         print("Camino encontrado:", path)

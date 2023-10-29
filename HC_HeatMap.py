@@ -116,7 +116,7 @@ def main():
         start, goal = genera_start_goal(grid)
     except ValueError as e:
         print(e)
-        return
+        return 
 
     path, visited = hill_climbing(grid, start, goal, num_obstacles)
 

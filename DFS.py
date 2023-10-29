@@ -10,14 +10,14 @@ def is_valid(x, y, grid):
     # Verifica si las coordenadas (x, y) están dentro de la cuadrícula y no son un obstáculo (valor 1).
     return 0 <= x < len(grid) and 0 <= y < len(grid[0]) and grid[x][y] == 0
 
-def generate_obstacles(grid, n):
+def genera_obstaculos(grid, n):
     for _ in range(n):
         x, y = random.randint(0, len(grid) - 1), random.randint(0, len(grid[0]) - 1)
         while grid[x][y] == 1:
             x, y = random.randint(0, len(grid) - 1), random.randint(0, len(grid[0]) - 1)
         grid[x][y] = 1
 
-def generate_start_goal(grid):
+def genera_start_goal(grid):
     empty_cells = [(x, y) for x in range(len(grid)) for y in range(len(grid[0])) if grid[x][y] == 0]
     if len(empty_cells) < 2:
         raise ValueError("La cuadrícula no tiene suficientes celdas libres para establecer el inicio y la meta.")
@@ -41,7 +41,7 @@ def dfs(grid, start, goal):
             visited.add(current)
             visited_list.append(current)
 
-            # Define los movimientos posibles: arriba, abajo, derecha, izquierda.
+            # Define los movimientos posibles: izquierda, derecha, abajo, arriba.
             moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
             for dx, dy in moves:
@@ -64,7 +64,6 @@ def dfs(grid, start, goal):
 
     # Devuelve tanto la lista de nodos visitados como el camino
     return visited_list, path[::-1]
-
 
 
 def draw_grid(grid, start, goal, path, visited):
@@ -96,7 +95,7 @@ def draw_grid(grid, start, goal, path, visited):
         visited_x = [x * cell_size + cell_size / 2 for x in visited_x]
         visited_y = [y * cell_size + cell_size / 2 for y in visited_y]
         for i, (x, y) in enumerate(zip(visited_x, visited_y), 1):
-            plt.text(y, x, str(i), ha='center', va='center', color='green', fontsize=10)
+            plt.text(y, x, str(i), ha='center', va='center', color='green', fontsize=14)
     
     # Dibuja la cuadrícula
     for i in range(len(grid) + 1):
@@ -104,26 +103,20 @@ def draw_grid(grid, start, goal, path, visited):
     for j in range(len(grid[0]) + 1):
         plt.axvline(x=j * cell_size, color='black', linewidth=0.1)
     
-    # Quitar los labels de los ejes
-    #ax.set_xticks([])
-    #ax.set_yticks([])
-    
     plt.legend()
     plt.show()
 
 
-
-
 def main():
-    n = 10  # Tamaño de la cuadrícula (NxN)
+    n = 10 # Tamaño de la cuadrícula (NxN)
     grid = initialize_grid(n)
     
-    # Genera obstáculos aleatorios (N^2/2 obstáculos)
+    # Genera obstáculos aleatorios (N^2/4 obstáculos)
     num_obstacles = (n*n) // 4
-    generate_obstacles(grid, num_obstacles)
+    genera_obstaculos(grid, num_obstacles)
     
     try:
-        start, goal = generate_start_goal(grid)
+        start, goal = genera_start_goal(grid)
     except ValueError as e:
         print(e)
         return
